@@ -85,11 +85,17 @@ func StrategyList() gin.HandlerFunc {
 		if userID == "" {
 			userID = "default"
 		}
-		if globalStore == nil {
+		var storeToUse StoreInterface
+		if globalStore != nil {
+			storeToUse = globalStore
+		} else {
+			storeToUse = globalStoreInterface
+		}
+		if storeToUse == nil {
 			c.JSON(http.StatusOK, gin.H{"strategies": []model.Strategy{}})
 			return
 		}
-		strategies, err := globalStore.ListStrategies(userID)
+		strategies, err := storeToUse.ListStrategies(userID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -102,11 +108,17 @@ func StrategyList() gin.HandlerFunc {
 func StrategyGet() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		if globalStore == nil {
+		var storeToUse StoreInterface
+		if globalStore != nil {
+			storeToUse = globalStore
+		} else {
+			storeToUse = globalStoreInterface
+		}
+		if storeToUse == nil {
 			c.JSON(http.StatusOK, gin.H{"strategy": nil})
 			return
 		}
-		strategy, err := globalStore.GetStrategy(id)
+		strategy, err := storeToUse.GetStrategy(id)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
@@ -119,11 +131,17 @@ func StrategyGet() gin.HandlerFunc {
 func StrategyDelete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		if globalStore == nil {
+		var storeToUse StoreInterface
+		if globalStore != nil {
+			storeToUse = globalStore
+		} else {
+			storeToUse = globalStoreInterface
+		}
+		if storeToUse == nil {
 			c.JSON(http.StatusOK, gin.H{"deleted": true})
 			return
 		}
-		err := globalStore.DeleteStrategy(id)
+		err := storeToUse.DeleteStrategy(id)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

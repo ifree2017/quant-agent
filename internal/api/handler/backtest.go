@@ -55,16 +55,25 @@ func BacktestRun(dataDir string) gin.HandlerFunc {
 
 		jobID := uuid.New().String()
 
+		// Capture stores for goroutine (both concrete and interface-based)
+		bs := backtestStore
+		bsi := backtestStoreInterface
 		go func() {
 			loader := data.NewLoader(dataDir)
 			bars, _ := loader.LoadBars(cfg.Symbol, cfg.Days)
 			engine := backtest.NewEngine(cfg, dataDir)
 			result, _ := engine.Run(defaultRules, bars)
 			// 保存回测结果到数据库
-			if result != nil && backtestStore != nil {
+			var storeToSave StoreInterface
+			if bs != nil {
+				storeToSave = bs
+			} else {
+				storeToSave = bsi
+			}
+			if result != nil && storeToSave != nil {
 				result.ID = jobID
 				result.StrategyID = cfg.StrategyID
-				_ = backtestStore.SaveBacktest(result)
+				_ = storeToSave.SaveBacktest(result)
 			}
 		}()
 
@@ -79,11 +88,17 @@ func BacktestRun(dataDir string) gin.HandlerFunc {
 func BacktestGet() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		if backtestStore == nil {
+		var storeToUse StoreInterface
+		if backtestStore != nil {
+			storeToUse = backtestStore
+		} else {
+			storeToUse = backtestStoreInterface
+		}
+		if storeToUse == nil {
 			c.JSON(http.StatusOK, gin.H{"result": nil})
 			return
 		}
-		result, err := backtestStore.GetBacktest(id)
+		result, err := storeToUse.GetBacktest(id)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
