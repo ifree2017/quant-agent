@@ -331,3 +331,56 @@ select.form-control {
   color: #999;
   font-size: 14px;
 }
+
+/* Strategy Select */
+.strategy-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+.strategy-select label {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.strategy-select label.selected {
+  background: #e6f7ff;
+  border-color: #1890ff;
+}
+
+/* Danger Button */
+.btn-danger {
+  color: red;
+  margin-left: 8px;
+}
+
+/* Bar Chart */
+.bar-chart {
+  margin-top: 24px;
+}
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+.bar-label {
+  width: 120px;
+  font-size: 13px;
+}
+.bar-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.bar {
+  height: 20px;
+  transition: width 0.3s;
+}
+.bar-pos { background: #52c41a; }
+.bar-neg { background: #ff4d4f; }
+.bar-value {
+  margin-left: 8px;
+  font-size: 13px;
+}

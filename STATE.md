@@ -46,7 +46,7 @@
 | T10 | 策略生成Handler | ✅ |
 | T11 | PostgreSQL存储层 | ✅ |
 | T12 | 基础前端界面 | ✅ |
-| T13 | TDD测试 + GAN评审 | 🔄 进行中 |
+| T13 | TDD测试 + GAN评审 | ✅ GAN评审通过 |
 
 ---
 

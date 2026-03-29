@@ -5,6 +5,7 @@ import (
 	"os"
 	"quant-agent/internal/ai"
 	"quant-agent/internal/api/handler"
+	"quant-agent/internal/store"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ type Server struct {
 }
 
 // NewServer 创建服务器
-func NewServer(dataDir string, llmURL, llmToken string) *Server {
+func NewServer(dataDir string, llmURL, llmToken string, store *store.Store) *Server {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -28,6 +29,10 @@ func NewServer(dataDir string, llmURL, llmToken string) *Server {
 		dataDir:  dataDir,
 		aiClient: ai.NewClient(llmURL, llmToken),
 	}
+
+	// 注入 store
+	handler.SetStore(store)
+	handler.SetBacktestStore(store)
 
 	s.routes()
 	return s

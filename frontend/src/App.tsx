@@ -4,6 +4,7 @@ import StyleAnalyze from './pages/StyleAnalyze'
 import StrategyGenerate from './pages/StrategyGenerate'
 import Backtest from './pages/Backtest'
 import StrategyList from './pages/StrategyList'
+import Compare from './pages/Compare'
 
 const NAV = [
   { path: '/', label: '首页' },
@@ -11,6 +12,7 @@ const NAV = [
   { path: '/strategy-generate', label: '策略生成' },
   { path: '/backtest', label: '回测' },
   { path: '/strategies', label: '策略列表' },
+  { path: '/compare', label: '⚖️ 策略对比' },
 ]
 
 function Header() {
@@ -47,6 +49,7 @@ export default function App() {
             <Route path="/strategy-generate" element={<StrategyGenerate />} />
             <Route path="/backtest" element={<Backtest />} />
             <Route path="/strategies" element={<StrategyList />} />
+            <Route path="/compare" element={<Compare />} />
           </Routes>
         </main>
       </div>

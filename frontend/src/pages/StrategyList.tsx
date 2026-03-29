@@ -1,44 +1,79 @@
 import { useEffect, useState } from 'react'
-import { listStrategies, Strategy } from '../api/client'
+import { listStrategies, deleteStrategy } from '../api/client'
+
+interface Strategy {
+  id: string
+  name: string
+  style: string
+  version: number
+  created_at: string
+  rules: any
+}
 
 export default function StrategyList() {
   const [strategies, setStrategies] = useState<Strategy[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    listStrategies()
-      .then(data => setStrategies(Array.isArray(data) ? data : []))
-      .catch(() => setError('加载失败，请确保后端服务运行中'))
-      .finally(() => setLoading(false))
+    load()
   }, [])
 
+  async function load() {
+    setLoading(true)
+    try {
+      const data = await listStrategies()
+      setStrategies(data.strategies || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('确认删除？')) return
+    await deleteStrategy(id)
+    load()
+  }
+
+  if (loading) return <div className="loading">加载中...</div>
+
   return (
-    <div>
-      <h2 style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 600 }}>策略列表</h2>
-
-      {loading && <div className="loading">加载中...</div>}
-
-      {error && <p className="error-msg">{error}</p>}
-
-      {!loading && !error && strategies.length === 0 && (
-        <div className="card">
-          <p style={{ color: '#999', fontSize: '14px' }}>暂无策略</p>
-        </div>
+    <div className="container">
+      <h2>📊 策略库</h2>
+      {strategies.length === 0 ? (
+        <p>暂无策略，请先 <a href="/strategy">生成策略</a></p>
+      ) : (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>策略名称</th>
+              <th>风格</th>
+              <th>版本</th>
+              <th>创建时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {strategies.map((s) => (
+              <tr key={s.id}>
+                <td>{s.name}</td>
+                <td>{s.style}</td>
+                <td>v{s.version}</td>
+                <td>{new Date(s.created_at).toLocaleDateString()}</td>
+                <td>
+                  <button onClick={() => window.location.href = `/backtest?strategyId=${s.id}`}>
+                    回测
+                  </button>
+                  <button onClick={() => handleDelete(s.id)} className="btn-danger">
+                    删除
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
-
-      <div className="strategy-list">
-        {strategies.map((s, i) => (
-          <div key={s.id || i} className="strategy-item">
-            <div className="strategy-info">
-              <span className="strategy-name">{s.name}</span>
-              <span className="strategy-meta">风格: {s.style}</span>
-              <span className="strategy-meta">版本: {s.version}</span>
-            </div>
-            <span className="strategy-meta">{s.createdAt}</span>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }

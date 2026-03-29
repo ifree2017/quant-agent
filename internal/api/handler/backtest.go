@@ -5,10 +5,19 @@ import (
 	"quant-agent/internal/backtest"
 	"quant-agent/internal/data"
 	"quant-agent/internal/model"
+	"quant-agent/internal/store"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
+
+// globalStore 全局 store 实例（共享 strategy handler 的实例）
+var backtestStore *store.Store
+
+// SetBacktestStore 注入 store 实例
+func SetBacktestStore(s *store.Store) {
+	backtestStore = s
+}
 
 // BacktestRun 执行回测
 func BacktestRun(dataDir string) gin.HandlerFunc {
@@ -44,15 +53,23 @@ func BacktestRun(dataDir string) gin.HandlerFunc {
 			},
 		}
 
+		jobID := uuid.New().String()
+
 		go func() {
 			loader := data.NewLoader(dataDir)
 			bars, _ := loader.LoadBars(cfg.Symbol, cfg.Days)
 			engine := backtest.NewEngine(cfg, dataDir)
-			_, _ = engine.Run(defaultRules, bars)
+			result, _ := engine.Run(defaultRules, bars)
+			// 保存回测结果到数据库
+			if result != nil && backtestStore != nil {
+				result.ID = jobID
+				result.StrategyID = cfg.StrategyID
+				_ = backtestStore.SaveBacktest(result)
+			}
 		}()
 
 		c.JSON(http.StatusOK, gin.H{
-			"jobId": uuid.New().String(),
+			"jobId": jobID,
 			"status": "queued",
 		})
 	}
@@ -61,6 +78,16 @@ func BacktestRun(dataDir string) gin.HandlerFunc {
 // BacktestGet 回测结果
 func BacktestGet() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"result": nil})
+		id := c.Param("id")
+		if backtestStore == nil {
+			c.JSON(http.StatusOK, gin.H{"result": nil})
+			return
+		}
+		result, err := backtestStore.GetBacktest(id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"result": result})
 	}
 }

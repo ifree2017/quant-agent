@@ -44,8 +44,17 @@ export const runBacktest = (params: any): Promise<BacktestResult> =>
     body: JSON.stringify(params)
   }).then(r => r.json())
 
-export const listStrategies = (): Promise<Strategy[]> =>
+export const listStrategies = () =>
   fetch(`${API}/api/strategies`).then(r => r.json())
 
+export const getStrategy = (id: string) =>
+  fetch(`${API}/api/strategies/${id}`).then(r => r.json())
+
+export const deleteStrategy = (id: string) =>
+  fetch(`${API}/api/strategies/${id}`, { method: 'DELETE' }).then(r => r.json())
+
+export const getBacktest = (id: string) =>
+  fetch(`${API}/api/backtest/${id}`).then(r => r.json())
+
 export const getStats = (): Promise<{ totalStrategies: number; totalBacktests: number; avgReturn: number; avgSharpe: number }> =>
-  fetch(`${API}/api/stats`).then(r => r.json())
+  fetch(`${API}/api/stats`).then(r => r.ok ? r.json() : null).catch(() => null)
