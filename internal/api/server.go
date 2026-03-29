@@ -75,6 +75,9 @@ func (s *Server) routes() {
 	s.engine.GET("/api/v1/social/hot", handler.GetMarketHot())
 	s.engine.GET("/api/v1/social/sentiment/:code", handler.GetStockSentiment())
 	s.engine.GET("/api/v1/social/posts/:code", handler.GetStockPosts())
+	s.engine.GET("/api/v1/social/wechat", handler.GetWeChatPosts())
+	s.engine.GET("/api/v1/social/douyin", handler.GetDouyinHot())
+	s.engine.GET("/api/v1/social/news", handler.GetNewsEvents())
 }
 
 // Run 启动服务器
