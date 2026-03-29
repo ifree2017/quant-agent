@@ -70,6 +70,11 @@ func (s *Server) routes() {
 
 	// 市场信息
 	s.engine.GET("/api/market/info", handler.GetMarketInfo())
+
+	// 社交情绪数据
+	s.engine.GET("/api/v1/social/hot", handler.GetMarketHot())
+	s.engine.GET("/api/v1/social/sentiment/:code", handler.GetStockSentiment())
+	s.engine.GET("/api/v1/social/posts/:code", handler.GetStockPosts())
 }
 
 // Run 启动服务器
