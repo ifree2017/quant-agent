@@ -1,7 +1,7 @@
-# QuantAgent 智能量化策略系统 — 技术方案 v1.1
+# QuantAgent 智能量化策略系统 — 技术方案 v1.2
 
-> 版本：v1.1 | 日期：2026-03-29
-> 更新：全 Go 架构，移除 Python/FastAPI
+> 版本：v1.2 | 日期：2026-03-29
+> 更新：存储层 SQLite → PostgreSQL（目标用户 100+，需要多用户并发支持）
 > 状态：待评审
 
 ---
@@ -22,7 +22,7 @@
 │                    │  └────────┘  └───────────┘  │  │
 │                    │  ┌────────┐  ┌───────────┐  │  │
 │                    │  │Strategy │  │Data Loader │  │  │
-│                    │  │ Manager │  │(CSV/SQLite)│  │  │
+│                    │  │ Manager │  │(CSV/PostgreSQL)│  │  │
 │                    │  └────────┘  └───────────┘  │  │
 │                    └──────────────────────────────────┘  │
 └─────────────────────────────────────────────────────┘
@@ -35,7 +35,7 @@
 | API 层 | Go | Gin | HTTP 接口 |
 | AI 引擎 | Go | 原生 HTTP Client | 调用 OpenAI/Groq API |
 | 回测引擎 | Go | 原生 | 高性能撮合 + 绩效计算 |
-| 数据层 | Go | SQLite | 策略存储 + 回测结果 |
+| 数据层 | Go | PostgreSQL | 策略存储 + 回测结果 |
 | 前端 | TypeScript | React | 策略管理界面 |
 
 ### 1.3 模块职责（全 Go）
@@ -70,7 +70,7 @@ quant-agent（单一 Go 二进制）
 │   │   └── loader.go    — CSV 数据加载
 │   ├── report/
 │   │   ├── metrics.go    — 绩效指标计算
-│   │   └── store.go      — SQLite 持久化
+│   │   └── store.go      — PostgreSQL 持久化
 │   └── model/
 │       ├── style.go      — 风格画像模型
 │       ├── strategy.go   — 策略模型
@@ -78,7 +78,7 @@ quant-agent（单一 Go 二进制）
 ├── pkg/
 │   └── llm/             — LLM API 调用封装
 ├── data/                 — CSV 数据目录
-└── migrations/           — SQLite Schema
+└── migrations/           — PostgreSQL Schema
 ```
 
 ---
@@ -159,7 +159,7 @@ StrategyExecutor.Init(rules) — 初始化指标
 
 ## 4. 数据存储
 
-### 4.1 SQLite（Go 侧）
+### 4.1 PostgreSQL（Go 侧）
 
 ```sql
 -- 策略表
@@ -252,7 +252,7 @@ date,open,high,low,close,volume
 | T8 | AI Client（Go HTTP → LLM API）|
 | T9 | 风格分析 Handler |
 | T10 | 策略生成 Handler |
-| T11 | SQLite 存储层 |
+| T11 | PostgreSQL 存储层 |
 | T12 | 基础前端界面 |
 | T13 | TDD 测试 + GAN 评审 |
 
@@ -265,5 +265,5 @@ date,open,high,low,close,volume
 | ADR-001 | **全 Go** | 单一二进制、部署简单、无 Python 运行时 |
 | ADR-002 | **Gin HTTP** | 轻量、高性能、成熟 |
 | ADR-003 | **Go HTTP Client 调用 LLM** | 直接调用 OpenAI/Groq API，无中间层 |
-| ADR-004 | **SQLite 存储** | 简单、无外部依赖、内嵌 |
+| ADR-004 | **PostgreSQL 存储** | 多用户并发，pgx 连接池，阿里云 ECS :5432 已有 |
 | ADR-005 | **React 前端** | 交互友好 |
