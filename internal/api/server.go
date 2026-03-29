@@ -64,6 +64,12 @@ func (s *Server) routes() {
 
 	// 回测结果
 	s.engine.GET("/api/backtest/:id", handler.BacktestGet())
+
+	// 参数优化
+	s.engine.POST("/api/optimize", handler.Optimize(s.dataDir))
+
+	// 市场信息
+	s.engine.GET("/api/market/info", handler.GetMarketInfo())
 }
 
 // Run 启动服务器
