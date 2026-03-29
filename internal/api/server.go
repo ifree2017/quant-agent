@@ -1,0 +1,77 @@
+package api
+
+import (
+	"log"
+	"os"
+	"quant-agent/internal/ai"
+	"quant-agent/internal/api/handler"
+
+	"github.com/gin-gonic/gin"
+)
+
+// Server HTTP服务器
+type Server struct {
+	engine   *gin.Engine
+	dataDir  string
+	aiClient *ai.Client
+}
+
+// NewServer 创建服务器
+func NewServer(dataDir string, llmURL, llmToken string) *Server {
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(gin.Logger())
+
+	s := &Server{
+		engine:   r,
+		dataDir:  dataDir,
+		aiClient: ai.NewClient(llmURL, llmToken),
+	}
+
+	s.routes()
+	return s
+}
+
+func (s *Server) routes() {
+	// 健康检查
+	s.engine.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
+
+	// 风格分析
+	s.engine.POST("/api/style/analyze", handler.StyleAnalyze(s.aiClient))
+
+	// 策略生成
+	s.engine.POST("/api/strategy/generate", handler.StrategyGenerate(s.aiClient, s.dataDir))
+
+	// 策略列表
+	s.engine.GET("/api/strategies", handler.StrategyList())
+
+	// 策略详情
+	s.engine.GET("/api/strategies/:id", handler.StrategyGet())
+
+	// 删除策略
+	s.engine.DELETE("/api/strategies/:id", handler.StrategyDelete())
+
+	// 执行回测
+	s.engine.POST("/api/backtest", handler.BacktestRun(s.dataDir))
+
+	// 回测结果
+	s.engine.GET("/api/backtest/:id", handler.BacktestGet())
+}
+
+// Run 启动服务器
+func (s *Server) Run(addr string) {
+	log.Printf("QuantAgent server starting on %s", addr)
+	if err := s.engine.Run(addr); err != nil {
+		log.Fatalf("server error: %v", err)
+	}
+}
+
+func getEnv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
