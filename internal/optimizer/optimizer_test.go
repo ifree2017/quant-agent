@@ -157,3 +157,63 @@ func TestBuildParamSpace(t *testing.T) {
 		}
 	}
 }
+
+func TestOptimizeConfig_Defaults(t *testing.T) {
+	cfg := OptimizeConfig{Symbol: "000001", DataDir: "./data", Days: 60}
+	if cfg.Target != "" {
+		t.Errorf("default target should be empty, got %s", cfg.Target)
+	}
+	if cfg.Method != "" {
+		t.Errorf("default method should be empty, got %s", cfg.Method)
+	}
+	if cfg.GridMaxCombinations != 0 {
+		t.Errorf("default GridMaxCombinations should be 0, got %d", cfg.GridMaxCombinations)
+	}
+}
+
+func TestOptimizeResult_Rank(t *testing.T) {
+	r := OptimizeResult{
+		Params: map[string]float64{"MA_period": 20},
+		Rank:   1,
+	}
+	if r.Rank != 1 {
+		t.Errorf("Rank: got %d, want 1", r.Rank)
+	}
+	if r.Params["MA_period"] != 20 {
+		t.Errorf("Params[MA_period]: got %f, want 20", r.Params["MA_period"])
+	}
+}
+
+func TestBuildParamSpace_Empty(t *testing.T) {
+	space := buildParamSpace(map[string][]float64{})
+	if len(space.names) != 0 {
+		t.Errorf("empty param space should have 0 names, got %d", len(space.names))
+	}
+}
+
+func TestBuildParamSpace_SingleValue(t *testing.T) {
+	ps := map[string][]float64{
+		"period": {10},
+	}
+	space := buildParamSpace(ps)
+	if len(space.names) != 1 {
+		t.Errorf("single param should have 1 name, got %d", len(space.names))
+	}
+	if space.bounds[0][0] != 10 || space.bounds[0][1] != 10 {
+		t.Errorf("single value should set min==max, got [%v, %v]", space.bounds[0][0], space.bounds[0][1])
+	}
+}
+
+func TestBuildParamSpace_NoValues(t *testing.T) {
+	ps := map[string][]float64{
+		"period": {},
+	}
+	space := buildParamSpace(ps)
+	if len(space.names) != 1 {
+		t.Errorf("param with empty values should still have 1 name, got %d", len(space.names))
+	}
+	// 默认边界 [0, 100]
+	if space.bounds[0][0] != 0 || space.bounds[0][1] != 100 {
+		t.Errorf("empty values should default to [0,100], got [%v, %v]", space.bounds[0][0], space.bounds[0][1])
+	}
+}
