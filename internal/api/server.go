@@ -78,6 +78,11 @@ func (s *Server) routes() {
 	s.engine.GET("/api/v1/social/wechat", handler.GetWeChatPosts())
 	s.engine.GET("/api/v1/social/douyin", handler.GetDouyinHot())
 	s.engine.GET("/api/v1/social/news", handler.GetNewsEvents())
+
+	// 社交情绪信号
+	s.engine.GET("/api/v1/signal/:code", handler.GetSignal())
+	s.engine.GET("/api/v1/signal/sector", handler.GetSectorSignals())
+	s.engine.GET("/api/v1/signal/alerts", handler.GetAlerts())
 }
 
 // Run 启动服务器
