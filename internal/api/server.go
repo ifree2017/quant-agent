@@ -83,6 +83,10 @@ func (s *Server) routes() {
 	s.engine.GET("/api/v1/signal/:code", handler.GetSignal())
 	s.engine.GET("/api/v1/signal/sector", handler.GetSectorSignals())
 	s.engine.GET("/api/v1/signal/alerts", handler.GetAlerts())
+
+	// 出货识别 & 买点识别（F12/F13）
+	s.engine.GET("/api/v1/distribution/:code", handler.GetDistribution())
+	s.engine.GET("/api/v1/buypoint/:code", handler.GetBuyPoint())
 }
 
 // Run 启动服务器
