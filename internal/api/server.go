@@ -34,6 +34,9 @@ func NewServer(dataDir string, llmURL, llmToken string, store *store.Store) *Ser
 	handler.SetStore(store)
 	handler.SetBacktestStore(store)
 
+	// 注入 auth store
+	handler.SetUserStore(handler.NewStoreAuth(store))
+
 	s.routes()
 	return s
 }
@@ -43,6 +46,10 @@ func (s *Server) routes() {
 	s.engine.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
+
+	// Auth 认证
+	s.engine.POST("/api/auth/register", handler.Register())
+	s.engine.POST("/api/auth/login", handler.Login())
 
 	// 风格分析
 	s.engine.POST("/api/style/analyze", handler.StyleAnalyze(s.aiClient))

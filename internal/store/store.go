@@ -40,6 +40,11 @@ func (s *Store) Close() {
 	s.db.Close()
 }
 
+// DB returns the underlying connection pool for advanced operations.
+func (s *Store) DB() *pgxpool.Pool {
+	return s.db
+}
+
 // ---------------------------------------------------------------------------
 // StyleProfile
 // ---------------------------------------------------------------------------
