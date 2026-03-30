@@ -711,14 +711,66 @@ export default function StockMonitorPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 顶部栏 */}
+      {/* 顶部导航栏 */}
       <header className="sticky top-0 z-50 bg-background/90 backdrop-blur border-b border-slate-800 px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-base font-bold text-white">📈 A股实时监控</h1>
-            {user && <span className="text-slate-500 text-xs hidden sm:inline">| {user.username}</span>}
+          <div className="flex items-center gap-1">
+            <h1 className="text-base font-bold text-white">📈 A股监控</h1>
+            <span className="text-slate-600 mx-1">|</span>
+            <nav className="hidden md:flex items-center gap-1">
+              <button
+                onClick={() => router.push('/backtest')}
+                className="text-slate-400 hover:text-white text-xs px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                回测
+              </button>
+              <button
+                onClick={() => router.push('/strategy/list')}
+                className="text-slate-400 hover:text-white text-xs px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                策略列表
+              </button>
+              <button
+                onClick={() => router.push('/strategy/generate')}
+                className="text-slate-400 hover:text-white text-xs px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                策略生成
+              </button>
+              <button
+                onClick={() => router.push('/compare')}
+                className="text-slate-400 hover:text-white text-xs px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                策略对比
+              </button>
+              <button
+                onClick={() => router.push('/style/analyze')}
+                className="text-slate-400 hover:text-white text-xs px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                风格分析
+              </button>
+            </nav>
+            {user && <span className="text-slate-500 text-xs hidden lg:inline ml-2">| {user.username}</span>}
           </div>
           <div className="flex items-center gap-2">
+            {/* 移动端下拉菜单 */}
+            <div className="md:hidden relative">
+              <button
+                onClick={() => {
+                  const menu = document.getElementById('mobile-nav-menu')
+                  if (menu) menu.classList.toggle('hidden')
+                }}
+                className="text-slate-400 hover:text-white text-xs px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                ☰ 菜单
+              </button>
+              <div id="mobile-nav-menu" className="hidden absolute right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl p-2 min-w-[140px] z-50">
+                <button onClick={() => router.push('/backtest')} className="block w-full text-left text-xs text-slate-300 hover:text-white px-3 py-1.5 rounded hover:bg-slate-700">回测</button>
+                <button onClick={() => router.push('/strategy/list')} className="block w-full text-left text-xs text-slate-300 hover:text-white px-3 py-1.5 rounded hover:bg-slate-700">策略列表</button>
+                <button onClick={() => router.push('/strategy/generate')} className="block w-full text-left text-xs text-slate-300 hover:text-white px-3 py-1.5 rounded hover:bg-slate-700">策略生成</button>
+                <button onClick={() => router.push('/compare')} className="block w-full text-left text-xs text-slate-300 hover:text-white px-3 py-1.5 rounded hover:bg-slate-700">策略对比</button>
+                <button onClick={() => router.push('/style/analyze')} className="block w-full text-left text-xs text-slate-300 hover:text-white px-3 py-1.5 rounded hover:bg-slate-700">风格分析</button>
+              </div>
+            </div>
             <button
               onClick={() => setShowPicker(true)}
               className="text-slate-400 hover:text-white text-xs px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors"

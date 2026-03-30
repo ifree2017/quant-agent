@@ -143,3 +143,72 @@ export const quotesApi = {
   get: (code: string) => request<StockQuote>(`/api/quotes/${code}`),
   intraday: (code: string) => request<IntradayData>(`/api/intraday/${code}`),
 }
+
+// ── Quant Strategy API ────────────────────────────────────────────────────────
+
+export interface Strategy {
+  id: string
+  name: string
+  style: string
+  version: number
+  created_at: string
+  rules?: any
+}
+
+export interface BacktestResult {
+  returnRate?: number
+  sharpeRatio?: number
+  maxDrawdown?: number
+  winRate?: number
+  equity?: number[]
+  trades?: any[]
+  metrics?: {
+    totalReturn?: number
+    sharpeRatio?: number
+    maxDrawdown?: number
+    winRate?: number
+    profitLossRatio?: number
+    totalTrades?: number
+  }
+}
+
+export interface StatsResult {
+  totalStrategies: number
+  totalBacktests: number
+  avgReturn: number
+  avgSharpe: number
+}
+
+export const quantApi = {
+  // Stats
+  getStats: (): Promise<StatsResult | null> =>
+    fetch(`${API_BASE}/api/stats`).then(r => r.ok ? r.json() : null).catch(() => null),
+
+  // Strategies
+  listStrategies: (): Promise<{ strategies: Strategy[] }> =>
+    request<{ strategies: Strategy[] }>('/api/strategies'),
+  getStrategy: (id: string): Promise<Strategy> =>
+    request<Strategy>(`/api/strategies/${id}`),
+  deleteStrategy: (id: string): Promise<void> =>
+    request<void>(`/api/strategies/${id}`, { method: 'DELETE' }),
+
+  // Backtest
+  runBacktest: (params: { symbol: string; days: number; initialCash: number }): Promise<BacktestResult> =>
+    request<BacktestResult>('/api/backtest', { method: 'POST', body: JSON.stringify(params) }),
+  getBacktest: (id: string): Promise<{ metrics: BacktestResult }> =>
+    request<{ metrics: BacktestResult }>(`/api/backtest/${id}`),
+
+  // Strategy Generate
+  generateStrategy: (styleProfile: any, symbol: string): Promise<any> =>
+    request<any>('/api/strategy/generate', {
+      method: 'POST',
+      body: JSON.stringify({ userID: 'default', styleProfile, symbol }),
+    }),
+
+  // Style Analyze
+  analyzeStyle: (records: any[]): Promise<{ style?: string; riskScore?: number; tradeFrequency?: string }> =>
+    request<{ style?: string; riskScore?: number; tradeFrequency?: string }>('/api/style/analyze', {
+      method: 'POST',
+      body: JSON.stringify({ userID: 'default', records }),
+    }),
+}
