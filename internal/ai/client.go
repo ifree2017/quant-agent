@@ -25,7 +25,7 @@ func NewClient(baseURL, token string) *Client {
 	return &Client{
 		baseURL:    baseURL,
 		token:     token,
-		model:     "gpt-4o-mini",
+		model:     "MiniMax-M2",
 		client:    &http.Client{Timeout: 60 * time.Second},
 		maxRetries: 3,
 	}
